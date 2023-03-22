@@ -12,6 +12,10 @@ const expireTime = 1000 * 60 * 5// 5 min de tiempo
 
 export const register = async (req, res) => {
     const { username, password, fullName, type } = req.body
+
+    if (!username)
+        return res.status(409).json({ error: 'not enough parameters' })
+
     const exist = await client.db('test').collection('users').findOne({ usuario: username })
     // console.log(exist);
 
@@ -41,7 +45,7 @@ export const register = async (req, res) => {
         console.log(doc);
         if (!doc)
             return res.status(409).json({ error: 'error while inserting' })
-      
+
         console.log(newUser);
         req.session.cookie.originalMaxAge = newUser.maximo_tiempo_session_inactiva
         req.session.user = newUser
@@ -56,6 +60,10 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     const { username, password } = req.body
+
+    if (!username || !password)
+        return res.status(409).json({ error: 'not enough parameters' })
+
     console.log('from /login ' + req.sessionID);
     try {
         const doc = await client.db('test').collection('users').findOneAndUpdate({

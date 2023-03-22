@@ -10,6 +10,8 @@ const client = await MongoClient.connect(process.env.MONGO_URI)
 
 export const getDocs = async (req, res) => {
     try {
+        // const { sessionID } = req.query.params
+        // console.log(sessionID);
         const allDocs = await client.db('test').collection('docs').find().sort({ fecha_creacion: -1 }).map((d) => {
             // console.log(d)
             return { id: d._id, title: d.titulo }

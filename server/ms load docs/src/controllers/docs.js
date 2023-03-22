@@ -61,6 +61,9 @@ export const updateDoc = async (req, res) => {
     if (!logged)
         return res.status(401).json({ error: 'not logged' })
 
+    if(! _id || !titulo || ! documento || !fecha_modificacion || !modificado_por)
+            return res.status(409).json({error: 'not enough parameters'})
+
     const updateDoc = await client.db('test').collection('docs').updateOne({ _id: new ObjectId(_id) }, {
         $set: { 
             fecha_modificacion: fecha_modificacion,

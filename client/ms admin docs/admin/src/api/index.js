@@ -27,7 +27,8 @@ export const updateDoc = async (params) => {
         }
     })
 }
-export const getDocs = async () => {
+export const getDocs = async (sessionID) => {
+    // console.log(sessionID);
     return await axios.get(docsTitlesUrl + '/getdocs')
 }
 

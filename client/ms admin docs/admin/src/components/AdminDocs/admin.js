@@ -62,6 +62,7 @@ export default function DocsAdmin() {
     const [content, setContent] = React.useState('')
     const [modified, setModified] = React.useState({ modifiedBy: '', modifiedOn: '' })
     const [loadingDoc, setLoadingDoc] = React.useState(false)
+    // const valueRef = React.useRef('')
 
     React.useEffect(() => {
         const checkIfLogged = async () => {
@@ -72,7 +73,7 @@ export default function DocsAdmin() {
         }
 
         const getDocsTitles = async () => {
-            const res = await getDocs()
+            const res = await getDocs(sessionID)
             const arr = JSON.parse(res.data)
             arr.unshift({ id: 0, title: '*** new doc ***' })
             setDocsTitles(arr)
@@ -80,6 +81,7 @@ export default function DocsAdmin() {
 
         const receivedMsg = ({ body }) => {
             console.log(body);
+            getDocsTitles()
             enqueueSnackbar(`${body.nombre} updated/created a doc!`, { variant: 'info', autoHideDuration: 2000 })
         }
 
@@ -234,9 +236,6 @@ export default function DocsAdmin() {
     const handleResponse = (res) => {
         if (!res)
             return enqueueSnackbar('Service unavailable', { variant: 'error', autoHideDuration: 2000 })
-        // another error from axios
-        if (res.name === "AxiosError")
-            return enqueueSnackbar('an error ocurred!', { variant: 'error', autoHideDuration: 2000 })
 
         // unauthorized
         if (res.response.status === 401)
@@ -244,8 +243,9 @@ export default function DocsAdmin() {
 
         if (res.response.status === 404)
             return enqueueSnackbar('not found!', { variant: 'error', autoHideDuration: 2000 })
-
-
+        // another error from axios
+        if (res.name === "AxiosError")
+            return enqueueSnackbar('an error ocurred!', { variant: 'error', autoHideDuration: 2000 })
     }
 
     const handleDocClick = async (option) => {
@@ -257,6 +257,8 @@ export default function DocsAdmin() {
         }
         enqueueSnackbar('start editing the doc!', { variant: 'info', autoHideDuration: 2000 })
     }
+
+    const enqueueSB = (msg, variant, duration) => enqueueSnackbar(msg, { variant: variant, autoHideDuration: duration })
 
     return (
         <Box sx={{
@@ -299,7 +301,10 @@ export default function DocsAdmin() {
                         <Button
                             // disabled={content}
                             variant='outlined'
-                            onClick={() => setEdit(!edit)}>{edit ? 'Edit' : 'Visualization'}</Button>
+                            onClick={() => {
+                                // !edit && valueRef.current.focus()
+                                setEdit(!edit)
+                            }}>{edit ? 'Edit' : 'Visualization'}</Button>
                         <Button
                             onClick={async () => await handleCancel()}
                             // disabled={content}
@@ -309,8 +314,7 @@ export default function DocsAdmin() {
                         </Button>
                         <FileUploadSingle
                             onLoad={handleSetNewDoc}
-                        // setContent={setContent}
-                        // setTitle={setTitle}
+                            enqueueSnackbar={enqueueSB}
                         />
 
                     </Stack>
@@ -350,7 +354,9 @@ export default function DocsAdmin() {
                                 <Skeleton />
                             </>
                         }
-                        {!edit && !loadingDoc && <TextField fullWidth label="" id="fullWidth" multiline rows={13}
+                        {!edit && !loadingDoc && <TextField
+                            // inputRef={valueRef}
+                            fullWidth label="" id="fullWidth" multiline rows={13}
                             value={content}
                             onChange={(e) => {
                                 setContent(e.target.value)
